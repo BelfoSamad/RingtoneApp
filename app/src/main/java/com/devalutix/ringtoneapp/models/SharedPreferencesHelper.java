@@ -52,4 +52,8 @@ public class SharedPreferencesHelper {
     public boolean isDownloadEnable() {
         return sharedPref.getBoolean("Download", false);
     }
+
+    public String getUserName() {
+        return sharedPref.getString("User", "User");
+    }
 }

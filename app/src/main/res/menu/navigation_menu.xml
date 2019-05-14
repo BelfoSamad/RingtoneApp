@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/rateApp_menu"
+        android:title="Rate Our App" />
+    <item
+        android:id="@+id/shareApp_menu"
+        android:title="Share App" />
+    <item
+        android:id="@+id/privacy_policy"
+        android:title="Privacy Policy" />
+</menu>

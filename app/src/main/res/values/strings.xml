@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Ringtone App</string>
+    <string name="ADMOB_AD_BANNER_ID">test</string>
 </resources>

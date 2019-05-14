@@ -3,15 +3,24 @@ package com.devalutix.ringtoneapp.presenters;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.util.Log;
+import android.util.TypedValue;
 
 import androidx.core.app.ActivityCompat;
 
 import com.devalutix.ringtoneapp.contracts.MainContract;
 import com.devalutix.ringtoneapp.models.SharedPreferencesHelper;
+import com.devalutix.ringtoneapp.pojo.Category;
+import com.devalutix.ringtoneapp.pojo.Ringtone;
 import com.devalutix.ringtoneapp.ui.activities.MainActivity;
 import com.devalutix.ringtoneapp.utils.GDPR;
 import com.devalutix.ringtoneapp.utils.PermissionUtil;
 import com.google.android.gms.ads.AdView;
+import com.google.gson.Gson;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainPresenter implements MainContract.Presenter {
     private static String TAG = "MainPresenter";
@@ -125,5 +134,89 @@ public class MainPresenter implements MainContract.Presenter {
     @Override
     public GDPR getGDPR() {
         return gdpr;
+    }
+
+    @Override
+    public void initViewPager() {
+        ArrayList<Category> categories = getCategories();
+
+        mView.initViewPager(categories);
+
+        if (categories != null) mView.showCategories();
+        else mView.showNoCatgeories();
+    }
+
+    @Override
+    public void initRecyclerView() {
+        ArrayList<Ringtone> popular = getPopular();
+        ArrayList<Ringtone> recent = getRecent();
+
+        mView.initRecyclerView(popular, "popular");
+        mView.initRecyclerView(recent, "recent");
+
+        if (popular != null && recent != null) mView.showRingtones();
+        else mView.hideRingtones();
+    }
+
+    @Override
+    public void updateAll() {
+
+    }
+
+    @Override
+    public ArrayList<Category> getCategories() {
+        //TODO: Get Categories from Server
+
+        String json = null;
+        try {
+            InputStream is = mView.getAssets().open("categories.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
+        Category[] collectionItem = new Gson().fromJson(json, Category[].class);
+        return new ArrayList<Category>(Arrays.asList(collectionItem));
+    }
+
+    @Override
+    public ArrayList<Ringtone> getPopular() {
+        //TODO: Get Popular Ringtones from Server
+        String json = null;
+        try {
+            InputStream is = mView.getAssets().open("ringtones.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
+        Ringtone[] collectionItem = new Gson().fromJson(json, Ringtone[].class);
+        return new ArrayList<Ringtone>(Arrays.asList(collectionItem));
+    }
+
+    @Override
+    public ArrayList<Ringtone> getRecent() {
+        //TODO: Get Recent Ringtones from Server
+        return getPopular();
+    }
+
+    @Override
+    public String getUserName() {
+        return sharedPreferencesHelper.getUserName();
+    }
+
+    @Override
+    public int dipToPx(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, mView.getResources().getDisplayMetrics());
     }
 }

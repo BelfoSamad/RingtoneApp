@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/share_ringtone_action"
+        android:title="Share"/>
+    <item
+        android:id="@+id/download_ringtone_action"
+        android:title="Download"/>
+
+    <item
+        android:id="@+id/set_as_ringtone_action"
+        android:title="Set As Ringtone"/>
+</menu>
