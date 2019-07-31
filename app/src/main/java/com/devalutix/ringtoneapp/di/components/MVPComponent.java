@@ -7,6 +7,7 @@ import com.devalutix.ringtoneapp.ui.activities.MainActivity;
 import com.devalutix.ringtoneapp.di.annotations.ActivityContext;
 import com.devalutix.ringtoneapp.di.modules.ApplicationModule;
 import com.devalutix.ringtoneapp.di.modules.MVPModule;
+import com.devalutix.ringtoneapp.ui.activities.RingtonesActivity;
 
 import javax.inject.Singleton;
 
@@ -18,7 +19,7 @@ public interface MVPComponent {
 
     //Inject in Activities
     void inject(MainActivity mainActivity);
-
+    void inject(RingtonesActivity ringtonesActivity);
     //Inject in Fragments
 
     //Context

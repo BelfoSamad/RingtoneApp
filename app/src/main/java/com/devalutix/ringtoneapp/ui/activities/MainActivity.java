@@ -1,23 +1,25 @@
 package com.devalutix.ringtoneapp.ui.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.devalutix.ringtoneapp.R;
@@ -31,75 +33,144 @@ import com.devalutix.ringtoneapp.pojo.Ringtone;
 import com.devalutix.ringtoneapp.presenters.MainPresenter;
 import com.devalutix.ringtoneapp.ui.adapters.CategoriesPagerAdapter;
 import com.devalutix.ringtoneapp.ui.adapters.RingtonesAdapter;
-import com.devalutix.ringtoneapp.utils.Config;
-import com.google.android.gms.ads.AdView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import butterknife.BindFloat;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity implements MainContract.View {
     private static String TAG = "MainActivity";
     private static final int REQUEST_WRITE_STORAGE = 1;
 
-    //Declarations
+    /***************************************** Declarations ***************************************/
     private MVPComponent mvpComponent;
     @Inject
     MainPresenter mPresenter;
     private CategoriesPagerAdapter mAdapter;
     private RingtonesAdapter popularRingtonesAdapter;
     private RingtonesAdapter recentRingtonesAdapter;
-    private ArrayList<Ringtone> ringtones;
+    private BottomSheetBehavior actions_behavior;
+    private BottomSheetBehavior retry_behavior;
 
-    //View Declarations
+    /***************************************** View Declarations **********************************/
+    //Main
     @BindView(R.id.top_bar)
     ConstraintLayout top_bar;
     @BindView(R.id.user_welcome)
     TextView user_welcome_text;
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawer;
+    @BindView(R.id.search)
+    SearchView search;
+
+    //Content
     @BindView(R.id.categories_viewpager)
     ViewPager mViewPager;
     @BindView(R.id.popular_recyclerview)
     RecyclerView popularRecyclerView;
     @BindView(R.id.recent_recyclerview)
     RecyclerView recentRecyclerView;
-    @BindView(R.id.adView_main)
-    AdView ad;
 
-    //Listeners
+    //No Content Layout
+    @BindView(R.id.no_categories)
+    ImageView noCategoriesLayout;
+    @BindView(R.id.no_popular_ringtones)
+    ImageView noPopularLayout;
+    @BindView(R.id.no_recent_ringtones)
+    ImageView noRecentLayout;
+
+    //Actions Card
+    @BindView(R.id.actions_card)
+    CardView actions_card;
+
+    //Retry Card
+    @BindView(R.id.retry_card)
+    ConstraintLayout retry_card;
+    @BindView(R.id.retry_msg)
+    TextView retry_msg;
+
+    /***************************************** ClickListeners *************************************/
+    //Main
     @OnClick(R.id.drawer_menu)
     void openDrawer() {
         mDrawer.openDrawer(GravityCompat.START);
     }
 
+    @OnClick(R.id.add)
+    void goToProfile() {
+        //TODO: Pick File
+        startActivity(new Intent(this, ProfileActivity.class));
+    }
+
+    //See All
     @OnClick(R.id.see_all_popular)
     void goToPopularRingtones() {
         Intent i = new Intent(this, RingtonesActivity.class);
-        i.putExtra("mode", "popular");
-
+        i.putExtra("mode", "ringtones");
+        i.putExtra("name", "popular");
         startActivity(i);
     }
 
     @OnClick(R.id.see_all_recent)
     void goToRecentRingtones() {
         Intent i = new Intent(this, RingtonesActivity.class);
-        i.putExtra("mode", "recent");
-
+        i.putExtra("mode", "ringtones");
+        i.putExtra("name", "recent");
         startActivity(i);
     }
 
-    @OnClick(R.id.profile)
-    void goToProfile() {
-        startActivity(new Intent(this, ProfileActivity.class));
+    //Actions
+    @OnClick(R.id.set)
+    void openActionsCard() {
+        if (actions_behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED)
+            expandActionsCard();
+        else halfExpandActionsCard(mPresenter.getPosition(), mPresenter.getMode());
     }
 
-    //Essential Methods
+    @OnClick(R.id.download_ringtone)
+    void downloadRingtone() {
+        mPresenter.saveRingtone();
+        collapseActionsCard();
+    }
+
+    @OnClick(R.id.share_ringtone)
+    void shareRingtone() {
+        mPresenter.shareRingtone();
+        collapseActionsCard();
+    }
+
+    @OnClick(R.id.set_ringtone)
+    void setRingtone() {
+        mPresenter.setAsRingtone();
+        collapseActionsCard();
+    }
+
+    @OnClick(R.id.set_notification)
+    void setNotification() {
+        mPresenter.setAsNotification();
+        collapseActionsCard();
+    }
+
+    @OnClick(R.id.set_contact_ringtone)
+    void setContactRingtone() {
+        mPresenter.setAsContactRingtone();
+        collapseActionsCard();
+    }
+
+    //Retry
+    @OnClick(R.id.retry)
+    public void retry() {
+        refresh();
+    }
+
+    /*********************************** Essential Methods ****************************************/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: Creating Views");
@@ -141,60 +212,41 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     @Override
     protected void onPause() {
         super.onPause();
-        AdView ad1;
-        if (Config.ENABLE_AD_BANNER) {
-            if (Config.ENABLE_GDPR) {
-                //If Gdpr enabled get the Variable banner ad from the Class Gdpr
-                //else use the current one
-                ad1 = mPresenter.getGDPR().getmAd();
-            } else ad1 = ad;
-            ad1.pause();
-        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        AdView ad1;
-        if (Config.ENABLE_AD_BANNER) {
-            if (Config.ENABLE_GDPR) {
-                //If Gdpr enabled get the Variable banner ad from the Class Gdpr
-                //else use the current one
-                ad1 = mPresenter.getGDPR().getmAd();
-            } else ad1 = ad;
-            ad1.destroy();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        AdView ad1;
-        if (Config.ENABLE_AD_BANNER) {
-            if (Config.ENABLE_GDPR) {
-                //If Gdpr enabled get the Variable banner ad from the Class Gdpr
-                //else use the current one
-                ad1 = mPresenter.getGDPR().getmAd();
-            } else ad1 = ad;
-            ad1.resume();
-        }
     }
 
+    /********************************************* Methods ****************************************/
     @Override
     public void initUI() {
         Log.d(TAG, "initUI: Initializing the UI");
 
-        //Init Ad Banner
-        initAdBanner();
-
         //Set User Welcome Text
-        user_welcome_text.setText("Welcome Mr " + mPresenter.getUserName() + ",");
+        String welcome_text = "Welcome Mr " + mPresenter.getUserName();
+        user_welcome_text.setText(welcome_text);
 
         //Init Category ViewPager
         mPresenter.initViewPager();
 
-        //Init Popular/Recent Ringtones RecyclerView
+        //Init Popular/Recent Ringtone RecyclerView
         mPresenter.initRecyclerView();
+
+        //Init Search Bar
+        initSearchBar();
+
+        //Init Actions Popup
+        initActionsPopUp();
+
+        //Init Retry Card
+        initRetrySheet();
 
         //Bring top bar to front
         top_bar.bringToFront();
@@ -209,68 +261,162 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     @Override
     public void initRecyclerView(ArrayList<Ringtone> ringtones, String mode) {
-
-
-        //Set the List
-        this.ringtones = ringtones;
-
         //Declarations
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
 
         switch (mode) {
             case "popular": {
-                popularRingtonesAdapter = new RingtonesAdapter(ringtones, this);
+                popularRingtonesAdapter = new RingtonesAdapter(ringtones, this, mode);
                 popularRecyclerView.setLayoutManager(mLayoutManager);
                 popularRecyclerView.addItemDecoration(new MyItemDecoration());
                 popularRecyclerView.setAdapter(popularRingtonesAdapter);
             }
             break;
             case "recent": {
-                recentRingtonesAdapter = new RingtonesAdapter(ringtones, this);
+                recentRingtonesAdapter = new RingtonesAdapter(ringtones, this, mode);
                 recentRecyclerView.setLayoutManager(mLayoutManager);
                 recentRecyclerView.addItemDecoration(new MyItemDecoration());
                 recentRecyclerView.setAdapter(recentRingtonesAdapter);
             }
             break;
         }
-
-
     }
 
     @Override
-    public void initAdBanner() {
+    public void updateViewPager(ArrayList<Category> categories) {
+        mAdapter = new CategoriesPagerAdapter(this, categories);
+        mViewPager.setAdapter(mAdapter);
+    }
 
+    @Override
+    public void updateRecyclerView(ArrayList<Ringtone> ringtones, String mode) {
+
+        switch (mode) {
+            case "recent": {
+                recentRingtonesAdapter.clearAll();
+                recentRingtonesAdapter.addAll(ringtones);
+            }
+            break;
+            case "popular": {
+                popularRingtonesAdapter.clearAll();
+                popularRingtonesAdapter.addAll(ringtones);
+            }
+            break;
+        }
+    }
+
+    @Override
+    public void initActionsPopUp() {
+        actions_behavior = BottomSheetBehavior.from(actions_card);
+        actions_behavior.setHalfExpandedRatio(0.09f);
+
+        collapseActionsCard();
+    }
+
+    @Override
+    public void initRetrySheet() {
+        retry_behavior = BottomSheetBehavior.from(retry_card);
+        hideRetryCard();
     }
 
     @Override
     public void initSearchBar() {
+        EditText searchEditText = search.findViewById(R.id.search_src_text);
+        searchEditText.setTextColor(getResources().getColor(R.color.colorAccent));
+        searchEditText.setHintTextColor(getResources().getColor(R.color.colorAccent));
 
+        search.setOnSearchClickListener(v -> mDrawer.setVisibility(View.INVISIBLE));
+
+        search.setOnCloseListener(() -> {
+            mDrawer.setVisibility(VISIBLE);
+            return false;
+        });
+
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mPresenter.searchRingtone(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     @Override
     public void showCategories() {
-
+        noCategoriesLayout.setVisibility(View.GONE);
+        mViewPager.setVisibility(VISIBLE);
     }
 
     @Override
     public void showNoCatgeories() {
-
+        noCategoriesLayout.setVisibility(VISIBLE);
+        mViewPager.setVisibility(View.GONE);
     }
 
     @Override
     public void showRingtones() {
+        noPopularLayout.setVisibility(View.GONE);
+        popularRecyclerView.setVisibility(VISIBLE);
+        noRecentLayout.setVisibility(View.GONE);
+        recentRecyclerView.setVisibility(VISIBLE);
 
     }
 
     @Override
-    public void hideRingtones() {
+    public void showNoRingtones() {
+        noPopularLayout.setVisibility(VISIBLE);
+        popularRecyclerView.setVisibility(View.GONE);
+        noRecentLayout.setVisibility(VISIBLE);
+        recentRecyclerView.setVisibility(View.GONE);
+    }
 
+    @Override
+    public void showRetryCard(String message) {
+        retry_msg.setText(message);
+        retry_behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    @Override
+    public void hideRetryCard() {
+        retry_behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public void collapseActionsCard() {
+        actions_behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public void halfExpandActionsCard(int position, String mode) {
+        Log.d(TAG, "halfExpandActionsCard...");
+
+        actions_behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+        mPresenter.setCurrent(position);
+        mPresenter.setMode(mode);
+    }
+
+    @Override
+    public void expandActionsCard() {
+        actions_behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    @Override
+    public void refresh() {
+        hideRetryCard();
+        /// mRefresh.setRefreshing(true);
+        mPresenter.updateAll();
     }
 
     public class MyItemDecoration extends RecyclerView.ItemDecoration {
 
         @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view,
+                                   @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
             // only for the last one
             outRect.bottom = 16;
             outRect.left = 16;

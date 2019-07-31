@@ -5,14 +5,16 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:background="@color/colorPrimaryDark"
+    android:fitsSystemWindows="true"
     tools:context=".ui.activities.MainActivity">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/activity_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#00000000"
+        android:foreground="@drawable/dim_window"
         android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -47,14 +49,17 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <!--<androidx.appcompat.widget.SearchView-->
-                    <!--android:id="@+id/search"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginEnd="16dp"-->
-                    <!--app:layout_constraintBottom_toBottomOf="parent"-->
-                    <!--app:layout_constraintEnd_toEndOf="parent"-->
-                    <!--app:layout_constraintTop_toTopOf="parent" />-->
+                    <androidx.appcompat.widget.SearchView
+                        android:id="@+id/search"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        app:closeIcon="@drawable/close_search"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:searchHintIcon="@drawable/search"
+                        app:searchIcon="@drawable/search" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -79,11 +84,11 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageButton
-                        android:id="@+id/profile"
+                        android:id="@+id/add"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:layout_marginEnd="16dp"
-                        android:background="@drawable/account"
+                        android:background="@drawable/add"
                         app:layout_constraintBottom_toBottomOf="@id/user_welcome"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/user_welcome" />
@@ -99,6 +104,16 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/user_welcome" />
 
+                    <ImageView
+                        android:id="@+id/no_categories"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/user_welcome" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -109,7 +124,7 @@
             android:id="@+id/ringtones_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
+            app:cardBackgroundColor="@color/colorPrimary"
             app:cardCornerRadius="32dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
@@ -154,6 +169,19 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/popular" />
 
+                    <ImageView
+                        android:id="@+id/no_popular_ringtones"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginTop="32dp"
+                        android:layout_marginBottom="32dp"
+                        android:src="@color/colorPrimaryDark"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toTopOf="@id/recent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/popular" />
+
                     <TextView
                         android:id="@+id/recent"
                         android:layout_width="wrap_content"
@@ -187,21 +215,28 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/recent" />
 
+                    <ImageView
+                        android:id="@+id/no_recent_ringtones"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginTop="32dp"
+                        android:layout_marginBottom="32dp"
+                        android:src="@color/colorPrimaryDark"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/recent" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.core.widget.NestedScrollView>
 
         </androidx.cardview.widget.CardView>
 
-        <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/adView_main"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            ads:adSize="SMART_BANNER"
-            ads:adUnitId="@string/ADMOB_AD_BANNER_ID"
-            ads:layout_constraintBottom_toBottomOf="parent"
-            ads:layout_constraintEnd_toEndOf="parent"
-            ads:layout_constraintStart_toStartOf="parent" />
+        <include layout="@layout/actions_popup" />
+
+        <include layout="@layout/retry_card" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

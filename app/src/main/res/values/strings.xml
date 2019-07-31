@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Ringtone App</string>
     <string name="ADMOB_AD_BANNER_ID">test</string>
+    <string name="server_prblm_retry">Problem With Server</string>
+    <string name="net_prblm_retry">Problem With Internet Connection</string>
+    <string name="retry">Retry</string>
+    <string name="empty_search">No Results</string>
+    <string name="empty_results">Nothing Here</string>
+    <string name="search_toolbar">Search :</string>
 </resources>

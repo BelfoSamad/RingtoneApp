@@ -6,6 +6,8 @@ import android.content.Context;
 import com.devalutix.ringtoneapp.di.annotations.ActivityContext;
 import com.devalutix.ringtoneapp.models.SharedPreferencesHelper;
 import com.devalutix.ringtoneapp.presenters.MainPresenter;
+import com.devalutix.ringtoneapp.presenters.RingtonesPresenter;
+import com.devalutix.ringtoneapp.utils.ApiEndpointInterface;
 import com.devalutix.ringtoneapp.utils.GDPR;
 import com.devalutix.ringtoneapp.utils.PermissionUtil;
 import com.google.gson.Gson;
@@ -42,7 +44,14 @@ public class MVPModule {
     @Singleton
     MainPresenter providesMainPresenter(SharedPreferencesHelper sharedPreferencesHelper,
                                         PermissionUtil util,
-                                        GDPR gdpr){
-        return new MainPresenter(util,sharedPreferencesHelper,gdpr);
+                                        GDPR gdpr,
+                                        ApiEndpointInterface apiService){
+        return new MainPresenter(util,sharedPreferencesHelper,gdpr, apiService);
+    }
+
+    @Provides
+    @Singleton
+    RingtonesPresenter providesRingtonesPresenter(ApiEndpointInterface apiService){
+        return new RingtonesPresenter(apiService);
     }
 }

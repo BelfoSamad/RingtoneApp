@@ -49,4 +49,7 @@ public class Config {
      */
     public static final String YOUTUBE_CHANNEL = "https://www.youtube.com/user/theofficialfacebook";
 
+    public static final String BASE_API_URL = "https://www.facebook.com/";
+
+    public static final String TOKEN = "test";
 }

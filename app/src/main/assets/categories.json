@@ -1,0 +1,32 @@
+[
+  {
+    "categoryTitle": "Nature",
+    "categoryThumbnailUrl": "test",
+    "categoryCardColor": "#1abc9c"
+  },
+  {
+    "categoryTitle": "Music",
+    "categoryThumbnailUrl": "test",
+    "categoryCardColor": "#3498db"
+  },
+  {
+    "categoryTitle": "Funny",
+    "categoryThumbnailUrl": "test",
+    "categoryCardColor": "#e74c3c"
+  },
+  {
+    "categoryTitle": "Effects",
+    "categoryThumbnailUrl": "test",
+    "categoryCardColor": "#f1c40f"
+  },
+  {
+    "categoryTitle": "Classic",
+    "categoryThumbnailUrl": "test",
+    "categoryCardColor": "#e67e22"
+  },
+  {
+    "categoryTitle": "Games",
+    "categoryThumbnailUrl": "test",
+    "categoryCardColor": "#8e44ad"
+  }
+]

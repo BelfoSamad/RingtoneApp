@@ -16,15 +16,15 @@ public interface MainContract {
 
         void requestPermission(String writeExternalStorage, int requestWriteStorage);
 
-        void initGDPR(AdView ad);
-
-        GDPR getGDPR();
-
         void initViewPager();
 
         void initRecyclerView();
 
         void updateAll();
+
+        void updateViewPager();
+
+        void updateRecyclerView();
 
         ArrayList<Category> getCategories();
 
@@ -34,7 +34,28 @@ public interface MainContract {
 
         String getUserName();
 
+        void searchRingtone(String query);
+
+        void saveRingtone();
+
+        void shareRingtone();
+
+        void setAsRingtone();
+
+        void setAsNotification();
+
+        void setAsContactRingtone();
+
         int dipToPx(int dp);
+
+        void setCurrent(int position);
+
+        void setMode(String mode);
+
+        String getMode();
+
+        int getPosition();
+
     }
 
     interface View extends BaseView {
@@ -45,7 +66,13 @@ public interface MainContract {
 
         void initRecyclerView(ArrayList<Ringtone> ringtones, String mode);
 
-        void initAdBanner();
+        void updateViewPager(ArrayList<Category> categories);
+
+        void updateRecyclerView(ArrayList<Ringtone> ringtones, String mode);
+
+        void initActionsPopUp();
+
+        void initRetrySheet();
 
         void initSearchBar();
 
@@ -55,6 +82,18 @@ public interface MainContract {
 
         void showRingtones();
 
-        void hideRingtones();
+        void showNoRingtones();
+
+        void showRetryCard(String message);
+
+        void hideRetryCard();
+
+        void collapseActionsCard();
+
+        void halfExpandActionsCard(int position, String mode);
+
+        void expandActionsCard();
+
+        void refresh();
     }
 }

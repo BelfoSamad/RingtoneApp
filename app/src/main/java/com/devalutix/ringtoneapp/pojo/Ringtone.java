@@ -4,11 +4,13 @@ public class Ringtone {
 
     private String ringtoneId;
     private String ringtoneTitle;
+    private String ringtoneUrl;
     private String ringtoneThumbnailUrl;
 
-    public Ringtone(String ringtoneId, String ringtoneTitle, String ringtoneThumbnailUrl) {
+    public Ringtone(String ringtoneId, String ringtoneTitle, String ringtoneUrl, String ringtoneThumbnailUrl) {
         this.ringtoneId = ringtoneId;
         this.ringtoneTitle = ringtoneTitle;
+        this.ringtoneUrl = ringtoneUrl;
         this.ringtoneThumbnailUrl = ringtoneThumbnailUrl;
     }
 
@@ -22,5 +24,9 @@ public class Ringtone {
 
     public String getRingtoneThumbnailUrl() {
         return ringtoneThumbnailUrl;
+    }
+
+    public String getRingtoneUrl() {
+        return ringtoneUrl;
     }
 }

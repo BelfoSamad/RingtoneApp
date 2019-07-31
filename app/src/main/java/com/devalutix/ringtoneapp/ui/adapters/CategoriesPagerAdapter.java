@@ -1,8 +1,8 @@
 package com.devalutix.ringtoneapp.ui.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
-import android.media.Image;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,14 +12,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 
 import com.bumptech.glide.Glide;
 import com.devalutix.ringtoneapp.R;
 import com.devalutix.ringtoneapp.pojo.Category;
+import com.devalutix.ringtoneapp.ui.activities.RingtonesActivity;
 
 import java.util.ArrayList;
 
@@ -41,9 +39,9 @@ public class CategoriesPagerAdapter extends PagerAdapter {
         ViewGroup layout = (ViewGroup) inflater.inflate(R.layout.category_item, container, false);
 
         //Setup and Events
-        CardView c_container = (CardView) layout.findViewById(R.id.category_container);
-        ImageView c_thumbnail = (ImageView) layout.findViewById(R.id.category_thumbnail);
-        TextView c_title = (TextView) layout.findViewById(R.id.category_title);
+        CardView c_container = layout.findViewById(R.id.category_container);
+        ImageView c_thumbnail = layout.findViewById(R.id.category_thumbnail);
+        TextView c_title = layout.findViewById(R.id.category_title);
 
         //Setup Item
         Log.d("CategoriesAdapter", "instantiateItem: title" + categories.get(position).getCategoryTitle());
@@ -56,11 +54,12 @@ public class CategoriesPagerAdapter extends PagerAdapter {
         c_container.setCardBackgroundColor(Color.parseColor(categories.get(position).getCategoryCardColor()));
 
         //Event
-        c_container.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO: Go To RingtonesActivity
-            }
+        c_container.setOnClickListener(v -> {
+            Intent i = new Intent(mContext, RingtonesActivity.class);
+            i.putExtra("mode", "category");
+            i.putExtra("name", categories.get(position).getCategoryTitle());
+
+            mContext.startActivity(i);
         });
 
         container.addView(layout);
@@ -79,7 +78,7 @@ public class CategoriesPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object object) {
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
         return view == object;
     }
 

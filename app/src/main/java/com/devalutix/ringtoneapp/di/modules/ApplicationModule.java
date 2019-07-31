@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 
 import com.devalutix.ringtoneapp.di.annotations.ApplicationContext;
 import com.devalutix.ringtoneapp.models.SharedPreferencesHelper;
+import com.devalutix.ringtoneapp.utils.ApiEndpointInterface;
+import com.devalutix.ringtoneapp.utils.Config;
 import com.devalutix.ringtoneapp.utils.GDPR;
 import com.devalutix.ringtoneapp.utils.PermissionUtil;
 import com.google.ads.consent.ConsentForm;
@@ -15,6 +17,8 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**********************************
  © 2018 Sam Dev
@@ -75,6 +79,21 @@ public class ApplicationModule {
     /*
         Utils
      */
+    @Provides
+    @Singleton
+    Retrofit providesRetrofitInstance(){
+        return new Retrofit.Builder()
+                .baseUrl(Config.BASE_API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    ApiEndpointInterface providesApiEndpoints(Retrofit retrofit){
+        return retrofit.create(ApiEndpointInterface.class);
+    }
+
     @Provides
     @Singleton
     GDPR providesGDPR() {

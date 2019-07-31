@@ -1,16 +1,19 @@
 package com.devalutix.ringtoneapp.ui.adapters;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +22,9 @@ import com.bumptech.glide.Glide;
 import com.devalutix.ringtoneapp.R;
 import com.devalutix.ringtoneapp.pojo.Ringtone;
 import com.devalutix.ringtoneapp.ui.activities.MainActivity;
+import com.devalutix.ringtoneapp.ui.activities.RingtonesActivity;
+import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.github.ybq.android.spinkit.style.Wave;
 
 import java.util.ArrayList;
 
@@ -28,10 +34,37 @@ public class RingtonesAdapter extends RecyclerView.Adapter<RingtonesAdapter.View
     //Declarations
     private ArrayList<Ringtone> ringtones;
     private MainActivity mView = null;
+    private RingtonesActivity mView1 = null;
+    private Context mContext;
+    private String mode;
+    private MediaPlayer mediaPlayer;
+    private boolean setting = false;
 
-    public RingtonesAdapter(ArrayList<Ringtone> ringtones, MainActivity mView) {
+    //View Declarations
+    private ProgressBar loading_curr = null;
+    private TextView title_curr = null;
+    private ImageView icon_curr = null;
+    private int pos_curr = -1;
+
+
+    public RingtonesAdapter(ArrayList<Ringtone> ringtones, MainActivity mView, String mode) {
         this.ringtones = ringtones;
         this.mView = mView;
+        this.mode = mode;
+        this.mContext = mView;
+
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+    }
+
+    public RingtonesAdapter(ArrayList<Ringtone> ringtones, RingtonesActivity mView, String mode) {
+        this.ringtones = ringtones;
+        this.mView1 = mView;
+        this.mode = mode;
+        this.mContext = mView;
+
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
     }
 
     @NonNull
@@ -45,46 +78,65 @@ public class RingtonesAdapter extends RecyclerView.Adapter<RingtonesAdapter.View
         return new RingtonesAdapter.ViewHolder(itemView);
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull RingtonesAdapter.ViewHolder holder, int position) {
         Log.d(TAG, "onBindViewHolder: Setting Views.");
 
         //Set Title
         holder.title.setText(ringtones.get(position).getRingtoneTitle());
-        Glide.with(mView)
+        Glide.with(mContext)
                 .load(ringtones.get(position).getRingtoneThumbnailUrl())
                 .fitCenter()
                 //.placeholder(R.drawable.loading_spinner)
                 .into(holder.thumbnail);
 
-        holder.drop_menu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PopupMenu popup = new PopupMenu(mView, v);
-                MenuInflater inflater = popup.getMenuInflater();
-                inflater.inflate(R.menu.actions, popup.getMenu());
-                popup.show();
 
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.share_ringtone_action:
-                                Toast.makeText(mView, "Sharing...", Toast.LENGTH_SHORT).show();
-                                return true;
-                            case R.id.download_ringtone_action:
-                                Toast.makeText(mView, "Downloading...", Toast.LENGTH_SHORT).show();
-                                return true;
-                            case R.id.set_as_ringtone_action:
-                                Toast.makeText(mView, "Setting...", Toast.LENGTH_SHORT).show();
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                });
-            }
+        Sprite wave = new Wave();
+        holder.loading.setIndeterminateDrawable(wave);
+
+        //Listener
+        holder.thumbnail.setOnClickListener(v -> {
+            if (!setting)
+                if (pos_curr == position)
+                    stopCurrentSound();
+                else if (pos_curr != -1) {
+                    stopCurrentSound();
+                    setCurrent(position, holder.loading, holder.title, holder.pause_stop);
+                    new Player().execute(ringtones.get(position).getRingtoneUrl());
+                } else {
+                    setCurrent(position, holder.loading, holder.title, holder.pause_stop);
+                    new Player().execute(ringtones.get(position).getRingtoneUrl());
+                }
         });
+        if (mView != null)
+            holder.drop_menu.setOnClickListener(v -> mView.halfExpandActionsCard(position, mode));
+        else holder.drop_menu.setOnClickListener(v -> mView1.halfExpandActionsCard(position, mode));
+    }
+
+    private void setCurrent(int position, ProgressBar loading, TextView title, ImageView icon) {
+        Log.d(TAG, "setCurrent: Setting Current - " + pos_curr);
+        title_curr = title;
+        loading_curr = loading;
+        icon_curr = icon;
+        pos_curr = position;
+    }
+
+    private void resetCurrent() {
+        Log.d(TAG, "resetCurrent: Resetting Current - " + pos_curr);
+        title_curr = null;
+        icon_curr = null;
+        loading_curr = null;
+        pos_curr = -1;
+    }
+
+    private void stopCurrentSound() {
+        Log.d(TAG, "stopCurrentSound: Stopping Current Sound - " + pos_curr);
+        mediaPlayer.stop();
+        mediaPlayer.reset();
+        icon_curr.setImageResource(R.drawable.play);
+        title_curr.setTextColor(mContext.getResources().getColor(R.color.colorPrimaryDark));
+        resetCurrent();
     }
 
     @Override
@@ -120,13 +172,63 @@ public class RingtonesAdapter extends RecyclerView.Adapter<RingtonesAdapter.View
         ImageView thumbnail;
         TextView title;
         ImageButton drop_menu;
+        ImageView pause_stop;
+        ProgressBar loading;
 
         ViewHolder(View v) {
             super(v);
 
-            thumbnail = (ImageView) v.findViewById(R.id.ringtone_thumbnail);
-            title = (TextView) v.findViewById(R.id.ringtone_title);
-            drop_menu = (ImageButton) v.findViewById(R.id.drop_menu);
+            thumbnail = v.findViewById(R.id.ringtone_thumbnail);
+            title = v.findViewById(R.id.ringtone_title);
+            drop_menu = v.findViewById(R.id.drop_menu);
+            pause_stop = v.findViewById(R.id.play_stop);
+            loading = v.findViewById(R.id.load);
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class Player extends AsyncTask<String, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            boolean prepared;
+            setting = true;
+            try {
+                mediaPlayer.setDataSource(strings[0]);
+
+                mediaPlayer.setOnCompletionListener(mediaPlayer -> {
+                    stopCurrentSound();
+                });
+
+                mediaPlayer.prepare();
+                prepared = true;
+
+            } catch (Exception e) {
+                Log.e("MyAudioStreamingApp", e.getMessage());
+                prepared = false;
+            }
+
+            return prepared;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+
+            Log.d(TAG, "onPostExecute: Starting Sound - " + pos_curr);
+            icon_curr.setImageResource(R.drawable.stop);
+            title_curr.setTextColor(mContext.getResources().getColor(R.color.colorAccent));
+            mediaPlayer.start();
+            loading_curr.setVisibility(View.GONE);
+            icon_curr.setVisibility(View.VISIBLE);
+            setting = false;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            loading_curr.setVisibility(View.VISIBLE);
+            icon_curr.setVisibility(View.GONE);
         }
     }
 }
