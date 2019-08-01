@@ -56,6 +56,8 @@ public interface CreateOneContract {
         void disableWaveform();
 
         void enableDisableButtons();
+
+        void updateEditText();
     }
 
 }

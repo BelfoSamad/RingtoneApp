@@ -14,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#00000000"
-        android:foreground="@drawable/dim_window"
         android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.AppBarLayout

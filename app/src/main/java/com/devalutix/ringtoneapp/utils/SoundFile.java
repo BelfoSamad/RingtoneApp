@@ -95,6 +95,7 @@ public class SoundFile {
         if (!f.exists()) {
             throw new java.io.FileNotFoundException(fileName);
         }
+        Log.d("SoundFile", "create: Test");
         String name = f.getName().toLowerCase();
         String[] components = name.split("\\.");
         if (components.length < 2) {

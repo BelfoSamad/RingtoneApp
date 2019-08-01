@@ -9,8 +9,10 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.devalutix.ringtoneapp.R;
@@ -36,36 +38,51 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     private MVPComponent mvpComponent;
     @Inject
     CreateOnePresenter mPresenter;
+    private ProgressDialog mProgressDialog;
+
+    //Markers
     private float mDensity;
     private int mMarkerLeftInset;
     private int mMarkerRightInset;
     private int mMarkerTopOffset;
     private int mMarkerBottomOffset;
+
+    //Visibility
     private boolean mStartVisible;
     private boolean mEndVisible;
+
+    //Position
     private int mMaxPos;
-    private int mLastDisplayedStartPos;
-    private int mLastDisplayedEndPos;
-    private String mCaption = "";
     private int mStartPos;
     private int mEndPos;
+    private int mLastDisplayedStartPos;
+    private int mLastDisplayedEndPos;
+
+    //Offset
+    private int mFlingVelocity;
     private int mOffset;
     private int mOffsetGoal;
-    private int mFlingVelocity;
-    private int mWidth;
-    private boolean mTouchDragging;
+
+    //Playing
     private int mPlayStartMsec;
     private int mPlayEndMsec;
-    private ProgressDialog mProgressDialog;
-    private boolean mFinishActivity;
-    private long mLoadingLastUpdateTime;
-    private boolean mLoadingKeepGoing;
+
+    //Touch
     private float mTouchStart;
+    private boolean mTouchDragging;
     private int mTouchInitialOffset;
-    private long mWaveformTouchStartMsec;
     private int mTouchInitialStartPos;
     private int mTouchInitialEndPos;
+    private long mWaveformTouchStartMsec;
+
+    //Loading
+    private long mLoadingLastUpdateTime;
+    private boolean mLoadingKeepGoing;
+
+    //Others
     private boolean mKeyDown;
+    private boolean mFinishActivity;
+    private int mWidth;
 
     /***************************************** View Declarations **********************************/
     @BindView(R.id.waveform)
@@ -74,8 +91,6 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     TextView mStartText;
     @BindView(R.id.endtext)
     TextView mEndText;
-    @BindView(R.id.play)
-    ImageButton mPlayButton;
     @BindView(R.id.mark_start)
     TextView markStartButton;
     @BindView(R.id.mark_end)
@@ -84,10 +99,8 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     MarkerView mStartMarker;
     @BindView(R.id.endmarker)
     MarkerView mEndMarker;
-    @BindView(R.id.info)
-    TextView mInfo;
-
-    /***************************************** ClickListeners *************************************/
+    @BindView(R.id.play)
+    ImageButton mPlayButton;
 
     /*********************************** Essential Methods ****************************************/
     @Override
@@ -116,7 +129,7 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
+        if (requestCode == 1 && data != null) {
             if (resultCode == RESULT_OK) {
                 Uri uri = data.getData();
                 mPresenter.loadFile(uri);
@@ -135,6 +148,16 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
                     .build();
         }
         return mvpComponent;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_SPACE) {
+            mPresenter.onPlay(mStartPos);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -167,6 +190,7 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         mMarkerTopOffset = (int) (10 * mDensity);
         mMarkerBottomOffset = (int) (10 * mDensity);
 
+        //Set Listeners
         mStartText.addTextChangedListener(mTextWatcher);
         mEndText.addTextChangedListener(mTextWatcher);
         mPlayButton.setOnClickListener(mPlayListener);
@@ -176,7 +200,6 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         enableDisableButtons();
 
         mWaveformView.setListener(this);
-        mInfo.setText(mCaption);
 
         mMaxPos = 0;
         mLastDisplayedStartPos = -1;
@@ -201,17 +224,6 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         mEndVisible = true;
 
         updateDisplay();
-    }
-
-    @Override
-    public void enableDisableButtons() {
-        if (mPresenter.isPlaying()) {
-            mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
-            mPlayButton.setContentDescription(getResources().getText(R.string.stop));
-        } else {
-            mPlayButton.setImageResource(android.R.drawable.ic_media_play);
-            mPlayButton.setContentDescription(getResources().getText(R.string.play));
-        }
     }
 
     private synchronized void updateDisplay() {
@@ -266,62 +278,71 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
                 mOffset += offsetDelta;
             }
         }
-    }
 
-    @Override
-    public SoundFile.ProgressListener initProgressDialog() {
-        mLoadingLastUpdateTime = mPresenter.getCurrentTime();
-        mLoadingKeepGoing = true;
-        mFinishActivity = false;
 
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgressDialog.setTitle(R.string.progress_dialog_loading);
-        mProgressDialog.setCancelable(true);
-        mProgressDialog.setOnCancelListener(
-                dialog -> {
-                    mLoadingKeepGoing = false;
-                    mFinishActivity = true;
-                });
-        mProgressDialog.show();
+        mWaveformView.setParameters(mStartPos, mEndPos, mOffset);
+        mWaveformView.invalidate();
 
-        final SoundFile.ProgressListener listener =
-                fractionComplete -> {
-                    long now = mPresenter.getCurrentTime();
-                    if (now - mLoadingLastUpdateTime > 100) {
-                        mProgressDialog.setProgress(
-                                (int) (mProgressDialog.getMax() * fractionComplete));
-                        mLoadingLastUpdateTime = now;
-                    }
-                    return mLoadingKeepGoing;
-                };
+        mStartMarker.setContentDescription(
+                getResources().getText(R.string.start_marker) + " " +
+                        formatTime(mStartPos));
+        mEndMarker.setContentDescription(
+                getResources().getText(R.string.end_marker) + " " +
+                        formatTime(mEndPos));
 
-        return listener;
-    }
+        int startX = mStartPos - mOffset - mMarkerLeftInset;
+        if (startX + mStartMarker.getWidth() >= 0) {
+            if (!mStartVisible) {
+                // Delay this to avoid flicker
+                mPresenter.getHandler().postDelayed(() -> {
+                    mStartVisible = true;
+                    mStartMarker.setAlpha(1f);
+                }, 0);
+            }
+        } else {
+            if (mStartVisible) {
+                mStartMarker.setAlpha(0f);
+                mStartVisible = false;
+            }
+            startX = 0;
+        }
 
-    @Override
-    public void showProgressDialog() {
-        mProgressDialog.show();
-    }
+        int endX = mEndPos - mOffset - mEndMarker.getWidth() + mMarkerRightInset;
+        if (endX + mEndMarker.getWidth() >= 0) {
+            if (!mEndVisible) {
+                // Delay this to avoid flicker
+                mPresenter.getHandler().postDelayed(() -> {
+                    mEndVisible = true;
+                    mEndMarker.setAlpha(1f);
+                }, 0);
+            }
+        } else {
+            if (mEndVisible) {
+                mEndMarker.setAlpha(0f);
+                mEndVisible = false;
+            }
+            endX = 0;
+        }
 
-    @Override
-    public void dismissProgressDialog() {
-        mProgressDialog.dismiss();
-    }
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(
+                startX,
+                mMarkerTopOffset,
+                -mStartMarker.getWidth(),
+                -mStartMarker.getHeight());
+        mStartMarker.setLayoutParams(params);
 
-    @Override
-    public boolean getmLoadingKeepGoing() {
-        return mLoadingKeepGoing;
-    }
-
-    @Override
-    public boolean getmFinishActivity() {
-        return mFinishActivity;
-    }
-
-    @Override
-    public void setInfo(String mInfoContent) {
-        mInfo.setText(mInfoContent);
+        params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(
+                endX,
+                mWaveformView.getMeasuredHeight() - mEndMarker.getHeight() - mMarkerBottomOffset,
+                -mStartMarker.getWidth(),
+                -mStartMarker.getHeight());
+        mEndMarker.setLayoutParams(params);
     }
 
     @Override
@@ -342,13 +363,6 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         if (mEndPos > mMaxPos)
             mEndPos = mMaxPos;
 
-        mCaption =
-                mSoundFile.getFiletype() + ", " +
-                        mSoundFile.getSampleRate() + " Hz, " +
-                        mSoundFile.getAvgBitrateKbps() + " kbps, " +
-                        formatTime(mMaxPos) + " " +
-                        getResources().getString(R.string.time_seconds);
-        mInfo.setText(mCaption);
 
         updateDisplay();
     }
@@ -370,6 +384,89 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         mPresenter.getPlayer().start();
         updateDisplay();
         enableDisableButtons();
+    }
+
+    @Override
+    public SoundFile.ProgressListener initProgressDialog() {
+        mLoadingLastUpdateTime = mPresenter.getCurrentTime();
+        mLoadingKeepGoing = true;
+        mFinishActivity = false;
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mProgressDialog.setTitle(R.string.progress_dialog_loading);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setOnCancelListener(
+                dialog -> {
+                    mLoadingKeepGoing = false;
+                    mFinishActivity = true;
+                });
+
+        showProgressDialog();
+
+        final SoundFile.ProgressListener listener =
+                fractionComplete -> {
+                    long now = mPresenter.getCurrentTime();
+                    if (now - mLoadingLastUpdateTime > 100) {
+                        mProgressDialog.setProgress(
+                                (int) (mProgressDialog.getMax() * fractionComplete));
+                        mLoadingLastUpdateTime = now;
+                    }
+                    return mLoadingKeepGoing;
+                };
+
+        return listener;
+    }
+
+    @Override
+    public void enableDisableButtons() {
+        if (mPresenter.isPlaying()) {
+            mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
+            mPlayButton.setContentDescription(getResources().getText(R.string.stop));
+        } else {
+            mPlayButton.setImageResource(android.R.drawable.ic_media_play);
+            mPlayButton.setContentDescription(getResources().getText(R.string.play));
+        }
+    }
+
+    @Override
+    public void updateEditText() {
+        // Updating an EditText is slow on Android.  Make sure
+        // we only do the update if the text has actually changed.
+        if (mStartPos != mLastDisplayedStartPos &&
+                !mStartText.hasFocus()) {
+            mStartText.setText(formatTime(mStartPos));
+            mLastDisplayedStartPos = mStartPos;
+        }
+
+        if (mEndPos != mLastDisplayedEndPos &&
+                !mEndText.hasFocus()) {
+            mEndText.setText(formatTime(mEndPos));
+            mLastDisplayedEndPos = mEndPos;
+        }
+    }
+
+    @Override
+    public void setInfo(String mInfoContent) {    }
+
+    @Override
+    public void showProgressDialog() {
+        mProgressDialog.show();
+    }
+
+    @Override
+    public void dismissProgressDialog() {
+        mProgressDialog.dismiss();
+    }
+
+    @Override
+    public boolean getmLoadingKeepGoing() {
+        return mLoadingKeepGoing;
+    }
+
+    @Override
+    public boolean getmFinishActivity() {
+        return mFinishActivity;
     }
 
     @Override
@@ -398,7 +495,7 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     }
 
     public void waveformTouchMove(float x) {
-        mOffset = trap((int)(mTouchInitialOffset + (mTouchStart - x)));
+        mOffset = trap((int) (mTouchInitialOffset + (mTouchStart - x)));
         updateDisplay();
     }
 
@@ -410,7 +507,7 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         if (elapsedMsec < 300) {
             if (mPresenter.isPlaying()) {
                 int seekMsec = mWaveformView.pixelsToMillisecs(
-                        (int)(mTouchStart + mOffset));
+                        (int) (mTouchStart + mOffset));
                 if (seekMsec >= mPlayStartMsec &&
                         seekMsec < mPlayEndMsec) {
                     mPresenter.getPlayer().seekTo(seekMsec);
@@ -418,7 +515,7 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
                     mPresenter.handlePause();
                 }
             } else {
-                mPresenter.onPlay((int)(mTouchStart + mOffset));
+                mPresenter.onPlay((int) (mTouchStart + mOffset));
             }
         }
     }
@@ -426,7 +523,7 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     public void waveformFling(float vx) {
         mTouchDragging = false;
         mOffsetGoal = mOffset;
-        mFlingVelocity = (int)(-vx);
+        mFlingVelocity = (int) (-vx);
         updateDisplay();
     }
 
@@ -465,10 +562,10 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         float delta = x - mTouchStart;
 
         if (marker == mStartMarker) {
-            mStartPos = trap((int)(mTouchInitialStartPos + delta));
-            mEndPos = trap((int)(mTouchInitialEndPos + delta));
+            mStartPos = trap((int) (mTouchInitialStartPos + delta));
+            mEndPos = trap((int) (mTouchInitialEndPos + delta));
         } else {
-            mEndPos = trap((int)(mTouchInitialEndPos + delta));
+            mEndPos = trap((int) (mTouchInitialEndPos + delta));
             if (mEndPos < mStartPos)
                 mEndPos = mStartPos;
         }
@@ -554,11 +651,7 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         // Delay updaing the display because if this focus was in
         // response to a touch event, we want to receive the touch
         // event too before updating the display.
-        mPresenter.getHandler().postDelayed(new Runnable() {
-            public void run() {
-                updateDisplay();
-            }
-        }, 100);
+        mPresenter.getHandler().postDelayed(this::updateDisplay, 100);
     }
 
     /***************************************** Listeners ******************************************/

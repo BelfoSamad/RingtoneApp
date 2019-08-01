@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.widget.ImageView;
 
 public class MarkerView extends ImageView {
+
     public interface MarkerListener {
         public void markerTouchStart(MarkerView marker, float pos);
         public void markerTouchMove(MarkerView marker, float pos);
