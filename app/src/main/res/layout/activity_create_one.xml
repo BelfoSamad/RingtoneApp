@@ -4,22 +4,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/colorPrimaryDark"
     tools:context=".ui.activities.CreateOneActivity">
+
+    <TextView
+        android:id="@+id/page_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create One"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"/>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/wave_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="96dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/page_name">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -53,69 +67,109 @@
 
     <ImageButton
         android:id="@+id/play"
-        android:layout_width="71dip"
-        android:layout_height="52dip"
-        android:layout_marginTop="6dip"
-        android:layout_marginBottom="6dip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:background="@drawable/custom_play"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/wave_wrapper"
+        android:layout_marginTop="32dp"/>
 
-    <TextView
-        android:id="@+id/mark_start"
-        android:layout_width="wrap_content"
-        android:layout_height="31dip"
-        android:layout_marginStart="32dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:labelFor="@+id/starttext"
-        android:text="@string/start_label"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="14sp"
-        android:textStyle="bold"
+    <androidx.cardview.widget.CardView
+        android:layout_width="96dp"
+        android:layout_height="64dp"
+        android:layout_marginStart="16dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp"
         app:layout_constraintBottom_toBottomOf="@id/play"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/play" />
+        app:layout_constraintTop_toTopOf="@id/play">
 
-    <EditText
-        android:id="@+id/starttext"
-        android:layout_width="70dp"
-        android:layout_height="31dp"
-        android:backgroundTint="@color/colorPrimaryDark"
-        android:inputType="number|numberDecimal"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@id/mark_start"
-        app:layout_constraintStart_toStartOf="@id/mark_start"
-        app:layout_constraintTop_toBottomOf="@id/mark_start" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/mark_end"
-        android:layout_width="wrap_content"
-        android:layout_height="31dip"
-        android:layout_marginEnd="32dp"
-        android:clickable="true"
-        android:labelFor="@+id/endtext"
-        android:text="@string/end_label"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="14sp"
-        android:textStyle="bold"
+            <TextView
+                android:id="@+id/mark_start"
+                android:layout_width="wrap_content"
+                android:layout_height="31dp"
+                android:layout_marginTop="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:labelFor="@+id/starttext"
+                android:text="@string/start_label"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/starttext"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:inputType="number|numberDecimal"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="96dp"
+        android:layout_height="64dp"
+        android:layout_marginEnd="16dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp"
         app:layout_constraintBottom_toBottomOf="@id/play"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/play"  />
+        app:layout_constraintTop_toTopOf="@id/play">
 
-    <EditText
-        android:id="@+id/endtext"
-        android:layout_width="70dip"
-        android:layout_height="31dip"
-        android:backgroundTint="@color/colorPrimaryDark"
-        android:inputType="number|numberDecimal"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@id/mark_end"
-        app:layout_constraintStart_toStartOf="@id/mark_end"
-        app:layout_constraintTop_toBottomOf="@id/mark_end"/>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/mark_end"
+                android:layout_width="wrap_content"
+                android:layout_height="31dp"
+                android:layout_marginTop="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:labelFor="@+id/endtext"
+                android:text="@string/end_label"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/endtext"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:inputType="number|numberDecimal"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -421,10 +421,10 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     @Override
     public void enableDisableButtons() {
         if (mPresenter.isPlaying()) {
-            mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
+            mPlayButton.setBackground(getResources().getDrawable(R.drawable.custom_stop));
             mPlayButton.setContentDescription(getResources().getText(R.string.stop));
         } else {
-            mPlayButton.setImageResource(android.R.drawable.ic_media_play);
+            mPlayButton.setBackground(getResources().getDrawable(R.drawable.custom_play));
             mPlayButton.setContentDescription(getResources().getText(R.string.play));
         }
     }
