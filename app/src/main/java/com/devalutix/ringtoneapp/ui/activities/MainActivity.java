@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -105,8 +104,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     @OnClick(R.id.add)
     void goToProfile() {
-        //TODO: Pick File
-        startActivity(new Intent(this, ProfileActivity.class));
+        startActivity(new Intent(this, CreateOneActivity.class));
     }
 
     //See All

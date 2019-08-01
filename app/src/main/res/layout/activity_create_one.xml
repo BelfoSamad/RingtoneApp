@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.activities.CreateOneActivity">
+
+    <com.devalutix.ringtoneapp.ui.custom.WaveformView
+        android:id="@+id/waveform"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.devalutix.ringtoneapp.ui.custom.MarkerView
+        android:id="@+id/startmarker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/start_marker"
+        android:nextFocusDown="@+id/endmarker"
+        android:src="@drawable/marker_left"
+        app:layout_constraintStart_toStartOf="@id/waveform"
+        app:layout_constraintTop_toTopOf="@id/waveform" />
+
+    <com.devalutix.ringtoneapp.ui.custom.MarkerView
+        android:id="@+id/endmarker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/end_marker"
+        android:nextFocusUp="@+id/startmarker"
+        android:nextFocusDown="@+id/info"
+        android:src="@drawable/marker_right"
+        app:layout_constraintBottom_toBottomOf="@id/waveform"
+        app:layout_constraintStart_toStartOf="@id/waveform" />
+
+    <TextView
+        android:id="@+id/info"
+        style="@style/AudioFileInfoOverlayText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:nextFocusUp="@+id/endmarker"
+        android:nextFocusDown="@+id/play"
+        app:layout_constraintBottom_toTopOf="@id/play"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/waveform" />
+
+    <ImageButton
+        android:id="@+id/play"
+        style="@android:style/MediaButton"
+        android:layout_width="71dip"
+        android:layout_height="52dip"
+        android:layout_marginTop="6dip"
+        android:layout_marginBottom="6dip"
+        android:contentDescription="@string/play"
+        android:src="@android:drawable/ic_media_play"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/mark_start"
+        android:layout_width="wrap_content"
+        android:layout_height="31dip"
+        android:layout_marginStart="16dp"
+        android:clickable="true"
+        android:labelFor="@+id/starttext"
+        android:text="@string/start_label"
+        android:textColor="#ffffffff"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/starttext"
+        android:layout_width="70dip"
+        android:layout_height="31dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="30dip"
+        android:gravity="center"
+        android:inputType="number|numberDecimal"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@id/mark_start"
+        app:layout_constraintStart_toStartOf="@id/mark_start"
+        app:layout_constraintTop_toBottomOf="@id/mark_start" />
+
+    <TextView
+        android:id="@+id/mark_end"
+        android:layout_width="wrap_content"
+        android:layout_height="31dip"
+        android:layout_marginEnd="16dp"
+        android:clickable="true"
+        android:labelFor="@+id/endtext"
+        android:text="@string/end_label"
+        android:textColor="#ffffffff"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/endtext"
+        android:layout_width="70dip"
+        android:layout_height="31dip"
+        android:layout_marginLeft="10dip"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:inputType="number|numberDecimal"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@id/mark_end"
+        app:layout_constraintStart_toStartOf="@id/mark_end"
+        app:layout_constraintTop_toBottomOf="@id/mark_end" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

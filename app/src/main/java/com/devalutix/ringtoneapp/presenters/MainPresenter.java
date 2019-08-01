@@ -57,6 +57,7 @@ public class MainPresenter implements MainContract.Presenter {
         this.apiService = apiService;
     }
 
+    //Essential Methods
     @Override
     public void attach(MainContract.View view) {
         mView = (MainActivity) view;
@@ -72,6 +73,7 @@ public class MainPresenter implements MainContract.Presenter {
         return !(mView == null);
     }
 
+    //Methods
     @Override
     public void requestPermission(String permission, int permissionRequest) {
         mPermissionUtil.checkPermission(mView, permission,

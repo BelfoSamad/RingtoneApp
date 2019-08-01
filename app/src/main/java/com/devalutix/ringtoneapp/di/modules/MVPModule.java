@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.devalutix.ringtoneapp.di.annotations.ActivityContext;
 import com.devalutix.ringtoneapp.models.SharedPreferencesHelper;
+import com.devalutix.ringtoneapp.presenters.CreateOnePresenter;
 import com.devalutix.ringtoneapp.presenters.MainPresenter;
 import com.devalutix.ringtoneapp.presenters.RingtonesPresenter;
 import com.devalutix.ringtoneapp.utils.ApiEndpointInterface;
@@ -53,5 +54,11 @@ public class MVPModule {
     @Singleton
     RingtonesPresenter providesRingtonesPresenter(ApiEndpointInterface apiService){
         return new RingtonesPresenter(apiService);
+    }
+
+    @Provides
+    @Singleton
+    CreateOnePresenter providesCreateOnePresenter(){
+        return new CreateOnePresenter();
     }
 }
