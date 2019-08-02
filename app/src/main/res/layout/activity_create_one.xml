@@ -263,13 +263,13 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Switch
-                android:id="@+id/set_contact_ringtone_custom"
+                android:id="@+id/set_alarm_custom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="18dp"
                 android:layout_marginEnd="16dp"
-                android:text="Set As Contact Ringtone"
+                android:text="Set As Alarm"
                 android:textColor="@color/colorPrimary"
                 android:textSize="16sp"
                 android:textStyle="bold"
@@ -288,7 +288,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/set_contact_ringtone_custom" />
+                app:layout_constraintTop_toBottomOf="@id/set_alarm_custom" />
 
             <TextView
                 android:id="@+id/create"

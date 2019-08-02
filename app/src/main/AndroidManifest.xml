@@ -4,6 +4,7 @@
     package="com.devalutix.ringtoneapp">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application
         android:name=".base.BaseApplication"
@@ -14,8 +15,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.activities.CreateOneActivity" />
-        <activity android:name=".ui.activities.RingtonesActivity" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -28,6 +27,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.activities.CreateOneActivity" />
+        <activity android:name=".ui.activities.RingtonesActivity" />
     </application>
 
 </manifest>

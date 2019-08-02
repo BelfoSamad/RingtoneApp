@@ -31,6 +31,10 @@ public interface CreateOneContract {
         void setPlaying(boolean playing);
 
         Handler getHandler();
+
+        void setRingtone(int startFrame, int endFrame, int duration,
+                         boolean isRingtone,
+                         boolean isNotification, boolean isAlarm);
     }
 
     interface View extends BaseView {
@@ -39,7 +43,7 @@ public interface CreateOneContract {
 
         SoundFile.ProgressListener initProgressDialog();
 
-        void showProgressDialog();
+        void showProgressDialog(int message);
 
         void dismissProgressDialog();
 

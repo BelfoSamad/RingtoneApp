@@ -30,5 +30,20 @@
     <!-- Labels next to the start and end time edit boxes -->
     <string name="start_label">Start:</string>
     <string name="end_label">End:</string>
+    <string name="no_unique_filename">No Unique File Name</string>
+    <string name="no_space_error">No Space</string>
+    <string name="write_error">Can\'t Write</string>
+    <string name="progress_dialog_saving">Saving...</string>
+    <string name="alert_yes_button">Yes</string>
+    <string name="set_default_notification">Set As Default Notification</string>
+    <string name="alert_title_success">Setting Done</string>
+    <string name="alert_no_button">No</string>
+    <string name="what_to_do_with_ringtone">What Should I Do</string>
+    <string name="make_default_ringtone_button">Make Default</string>
+    <string name="choose_contact_ringtone_button">Choose Contact</string>
+    <string name="do_nothing_with_ringtone_button">Do Nothing</string>
+    <string name="default_ringtone_success_message">Set As Default</string>
+    <string name="success_contact_ringtone">Set As Contact Ringtone</string>
+    <string name="choose_contact_title">Choose Contact</string>
 
 </resources>

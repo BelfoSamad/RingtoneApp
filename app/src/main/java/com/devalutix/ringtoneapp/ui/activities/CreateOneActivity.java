@@ -114,15 +114,26 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     Switch set_ringtone;
     @BindView(R.id.set_notification_custom)
     Switch set_notification;
-    @BindView(R.id.set_contact_ringtone_custom)
-    Switch set_contact_ringtone;
+    @BindView(R.id.set_alarm_custom)
+    Switch set_alarm;
 
-    /***************************************** ClickListener **************************************
+    /***************************************** ClickListener **************************************/
     @OnClick(R.id.create)
     public void createCustomRingtone() {
-        //mPresenter.setRingtone();
-    }
+        if (mPresenter.isPlaying())
+            mPresenter.handlePause();
 
+        double startTime = mWaveformView.pixelsToSeconds(mStartPos);
+        double endTime = mWaveformView.pixelsToSeconds(mEndPos);
+        final int startFrame = mWaveformView.secondsToFrames(startTime);
+        final int endFrame = mWaveformView.secondsToFrames(endTime);
+        final int duration = (int)(endTime - startTime + 0.5);
+
+        showProgressDialog(R.string.progress_dialog_saving);
+
+        mPresenter.setRingtone(startFrame, endFrame, duration, set_ringtone.isChecked(),
+                set_notification.isChecked(), set_alarm.isChecked());
+    }
 
     /*********************************** Essential Methods ****************************************/
     @Override
@@ -414,9 +425,8 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         mLoadingKeepGoing = true;
         mFinishActivity = false;
 
-        mProgressDialog = new ProgressDialog(this, R.style.CustomStyle);
+        mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgressDialog.setTitle(R.string.progress_dialog_loading);
         mProgressDialog.setCancelable(true);
         mProgressDialog.setOnCancelListener(
                 dialog -> {
@@ -424,20 +434,17 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
                     mFinishActivity = true;
                 });
 
-        showProgressDialog();
+        showProgressDialog(R.string.progress_dialog_loading);
 
-        final SoundFile.ProgressListener listener =
-                fractionComplete -> {
-                    long now = mPresenter.getCurrentTime();
-                    if (now - mLoadingLastUpdateTime > 100) {
-                        mProgressDialog.setProgress(
-                                (int) (mProgressDialog.getMax() * fractionComplete));
-                        mLoadingLastUpdateTime = now;
-                    }
-                    return mLoadingKeepGoing;
-                };
-
-        return listener;
+        return fractionComplete -> {
+            long now = mPresenter.getCurrentTime();
+            if (now - mLoadingLastUpdateTime > 100) {
+                mProgressDialog.setProgress(
+                        (int) (mProgressDialog.getMax() * fractionComplete));
+                mLoadingLastUpdateTime = now;
+            }
+            return mLoadingKeepGoing;
+        };
     }
 
     @Override
@@ -473,7 +480,8 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     }
 
     @Override
-    public void showProgressDialog() {
+    public void showProgressDialog(int message) {
+        mProgressDialog.setTitle(message);
         mProgressDialog.show();
     }
 
