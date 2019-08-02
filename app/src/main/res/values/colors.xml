@@ -17,9 +17,9 @@
     <color name="textLightDisabled">#80FFFFFF</color>
     <color name="textLightDisabledDEPRECATED">#4CFFFFFF</color>
 
-    <color name="waveform_selected">#E74C3C</color>
-    <color name="waveform_unselected">#b0281a</color>
-    <color name="waveform_unselected_bkgnd_overlay">#000000</color>
+    <color name="waveform_selected">#FFFFFF</color>
+    <color name="waveform_unselected">#FAFAFA</color>
+    <color name="waveform_unselected_bkgnd_overlay">#88000000</color>
     <color name="selection_border">#ffffff</color>
     <color name="playback_indicator">#fff200</color>
     <color name="grid_line">#66ffffff</color>

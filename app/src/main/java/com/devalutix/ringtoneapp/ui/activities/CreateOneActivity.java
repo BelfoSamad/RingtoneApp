@@ -13,6 +13,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.devalutix.ringtoneapp.R;
@@ -30,6 +32,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class CreateOneActivity extends AppCompatActivity implements CreateOneContract.View, MarkerView.MarkerListener,
         WaveformView.WaveformListener {
@@ -101,6 +104,25 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     MarkerView mEndMarker;
     @BindView(R.id.play)
     ImageButton mPlayButton;
+
+    //Seek Bar
+    @BindView(R.id.speed_seekbar)
+    SeekBar speedAdj;
+
+    //Set As ...
+    @BindView(R.id.set_ringtone_custom)
+    Switch set_ringtone;
+    @BindView(R.id.set_notification_custom)
+    Switch set_notification;
+    @BindView(R.id.set_contact_ringtone_custom)
+    Switch set_contact_ringtone;
+
+    /***************************************** ClickListener **************************************
+    @OnClick(R.id.create)
+    public void createCustomRingtone() {
+        //mPresenter.setRingtone();
+    }
+
 
     /*********************************** Essential Methods ****************************************/
     @Override
@@ -392,7 +414,7 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         mLoadingKeepGoing = true;
         mFinishActivity = false;
 
-        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog = new ProgressDialog(this, R.style.CustomStyle);
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setTitle(R.string.progress_dialog_loading);
         mProgressDialog.setCancelable(true);
@@ -447,7 +469,8 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
     }
 
     @Override
-    public void setInfo(String mInfoContent) {    }
+    public void setInfo(String mInfoContent) {
+    }
 
     @Override
     public void showProgressDialog() {
