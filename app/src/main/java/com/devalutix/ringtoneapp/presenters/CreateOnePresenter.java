@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.StringWriter;
+import java.util.Random;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -268,7 +269,7 @@ public class CreateOnePresenter implements CreateOneContract.Presenter {
     @Override
     public void setRingtone(int startFrame, int endFrame, int duration,
                             boolean isRingtone,
-                            boolean isNotification, boolean isAlarm) {
+                            boolean isNotification, boolean isAlarm, float factor) {
         mSaveSoundFileThread = new Thread() {
             public void run() {
                 // Try AAC first.
@@ -282,7 +283,7 @@ public class CreateOnePresenter implements CreateOneContract.Presenter {
                 Boolean fallbackToWAV = false;
                 try {
                     // Write the new file
-                    mSoundFile.WriteFile(outFile, startFrame, endFrame - startFrame);
+                    mSoundFile.WriteFile(outFile, startFrame, endFrame - startFrame, factor);
                 } catch (Exception e) {
                     // log the error and try to create a .wav file instead
                     if (outFile.exists()) {
@@ -306,7 +307,7 @@ public class CreateOnePresenter implements CreateOneContract.Presenter {
                     outFile = new File(outPath);
                     try {
                         // create the .wav file
-                        mSoundFile.WriteWAVFile(outFile, startFrame, endFrame - startFrame);
+                        mSoundFile.WriteWAVFile(outFile, startFrame, endFrame - startFrame, factor);
                     } catch (Exception e) {
 
                         // Creating the .wav file also failed. Stop the progress dialog, show an
@@ -391,16 +392,14 @@ public class CreateOnePresenter implements CreateOneContract.Presenter {
     }
 
     private String makeRingtoneFilename(CharSequence title, String extension) {
-        String subdir;
-        String externalRootDir = Environment.getExternalStorageDirectory().getPath();
+
+        String externalRootDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getPath();
 
         if (!externalRootDir.endsWith("/")) {
             externalRootDir += "/";
         }
 
-        subdir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getPath();
-
-        String parentdir = externalRootDir + subdir;
+        String parentdir = externalRootDir;
 
         // Create the parent directory
         File parentDirFile = new File(parentdir);
@@ -464,6 +463,10 @@ public class CreateOnePresenter implements CreateOneContract.Presenter {
         if (mTitle == null || mTitle.length() == 0) {
             mTitle = getBasename(mFilename);
         }
+        Random generator = new Random();
+        int n = 10000;
+        n = generator.nextInt(n);
+        mTitle = mTitle + "_" + n;
     }
 
     private String getBasename(String filename) {

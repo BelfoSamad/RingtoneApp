@@ -484,14 +484,14 @@ public class SoundFile {
     }
 
     // should be removed in the near future...
-    public void WriteFile(File outputFile, int startFrame, int numFrames)
+    public void WriteFile(File outputFile, int startFrame, int numFrames, float factor)
             throws java.io.IOException {
         float startTime = (float) startFrame * getSamplesPerFrame() / mSampleRate;
         float endTime = (float) (startFrame + numFrames) * getSamplesPerFrame() / mSampleRate;
-        WriteFile(outputFile, startTime, endTime);
+        WriteFile(outputFile, startTime, endTime, factor);
     }
 
-    public void WriteFile(File outputFile, float startTime, float endTime)
+    public void WriteFile(File outputFile, float startTime, float endTime, float factor)
             throws java.io.IOException {
         int startOffset = (int) (startTime * mSampleRate) * 2 * mChannels;
         int numSamples = (int) ((endTime - startTime) * mSampleRate);
@@ -616,7 +616,7 @@ public class SoundFile {
         try {
             FileOutputStream outputStream = new FileOutputStream(outputFile);
             outputStream.write(
-                    MP4Header.getMP4Header(mSampleRate, numChannels, frame_sizes, bitrate));
+                    MP4Header.getMP4Header(Math.round(mSampleRate * factor), numChannels, frame_sizes, bitrate));
             while (encoded_size - encodedBytes.position() > buffer.length) {
                 encodedBytes.get(buffer);
                 outputStream.write(buffer);
@@ -657,21 +657,21 @@ public class SoundFile {
     }
 
     // should be removed in the near future...
-    public void WriteWAVFile(File outputFile, int startFrame, int numFrames)
+    public void WriteWAVFile(File outputFile, int startFrame, int numFrames, float factor)
             throws java.io.IOException {
         float startTime = (float) startFrame * getSamplesPerFrame() / mSampleRate;
         float endTime = (float) (startFrame + numFrames) * getSamplesPerFrame() / mSampleRate;
-        WriteWAVFile(outputFile, startTime, endTime);
+        WriteWAVFile(outputFile, startTime, endTime, factor);
     }
 
-    public void WriteWAVFile(File outputFile, float startTime, float endTime)
+    public void WriteWAVFile(File outputFile, float startTime, float endTime, float factor)
             throws java.io.IOException {
         int startOffset = (int) (startTime * mSampleRate) * 2 * mChannels;
         int numSamples = (int) ((endTime - startTime) * mSampleRate);
 
         // Start by writing the RIFF header.
         FileOutputStream outputStream = new FileOutputStream(outputFile);
-        outputStream.write(WAVHeader.getWAVHeader(mSampleRate, mChannels, numSamples));
+        outputStream.write(WAVHeader.getWAVHeader(Math.round(mSampleRate * factor), mChannels, numSamples));
 
         // Write the samples to the file, 1024 at a time.
         byte buffer[] = new byte[1024 * mChannels * 2];  // Each sample is coded with a short.

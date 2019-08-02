@@ -34,7 +34,7 @@ public interface CreateOneContract {
 
         void setRingtone(int startFrame, int endFrame, int duration,
                          boolean isRingtone,
-                         boolean isNotification, boolean isAlarm);
+                         boolean isNotification, boolean isAlarm, float factor);
     }
 
     interface View extends BaseView {

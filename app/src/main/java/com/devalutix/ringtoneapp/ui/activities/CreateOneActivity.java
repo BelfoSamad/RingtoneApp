@@ -128,11 +128,39 @@ public class CreateOneActivity extends AppCompatActivity implements CreateOneCon
         final int startFrame = mWaveformView.secondsToFrames(startTime);
         final int endFrame = mWaveformView.secondsToFrames(endTime);
         final int duration = (int)(endTime - startTime + 0.5);
+        float factor = 0;
+
+        switch (speedAdj.getProgress()){
+            case 0:
+                factor = 0.25f;
+                break;
+            case 1:
+                factor = 0.5f;
+                break;
+            case 2:
+                factor = 0.75f;
+                break;
+            case 3:
+                factor = 1.0f;
+                break;
+            case 4:
+                factor = 1.25f;
+                break;
+            case 5:
+                factor = 1.50f;
+                break;
+            case 6:
+                factor = 1.75f;
+                break;
+            case 7:
+                factor = 2.0f;
+                break;
+        }
 
         showProgressDialog(R.string.progress_dialog_saving);
 
         mPresenter.setRingtone(startFrame, endFrame, duration, set_ringtone.isChecked(),
-                set_notification.isChecked(), set_alarm.isChecked());
+                set_notification.isChecked(), set_alarm.isChecked(), factor);
     }
 
     /*********************************** Essential Methods ****************************************/
