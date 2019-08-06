@@ -36,7 +36,7 @@ public interface MainContract {
 
         void searchRingtone(String query);
 
-        void saveRingtone();
+        void saveRingtone(String type);
 
         void shareRingtone();
 
@@ -44,18 +44,11 @@ public interface MainContract {
 
         void setAsNotification();
 
-        void setAsContactRingtone();
+        void setAsAlarm();
 
         int dipToPx(int dp);
 
-        void setCurrent(int position);
-
-        void setMode(String mode);
-
-        String getMode();
-
-        int getPosition();
-
+        void setRingtoneObject(String mode, int position);
     }
 
     interface View extends BaseView {
@@ -93,6 +86,8 @@ public interface MainContract {
         void halfExpandActionsCard(int position, String mode);
 
         void expandActionsCard();
+
+        void dimBackground(float factor);
 
         void refresh();
     }

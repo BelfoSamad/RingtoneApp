@@ -1,10 +1,14 @@
 package com.devalutix.ringtoneapp.presenters;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Toast;
@@ -34,6 +38,8 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static android.app.Activity.RESULT_OK;
+
 public class MainPresenter implements MainContract.Presenter {
     private static String TAG = "MainPresenter";
 
@@ -43,10 +49,9 @@ public class MainPresenter implements MainContract.Presenter {
     private SharedPreferencesHelper sharedPreferencesHelper;
     private GDPR gdpr;
     private ApiEndpointInterface apiService;
-    private int position = -1;
-    private String mode = null;
     private ArrayList<Ringtone> popularRingtones;
     private ArrayList<Ringtone> recentRingtones;
+    private Ringtone ringtone;
 
     //Constructor
     public MainPresenter(PermissionUtil mPermissionUtil, SharedPreferencesHelper sharedPreferencesHelper,
@@ -407,62 +412,187 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     @Override
-    public void saveRingtone() {
+    public void saveRingtone(String type) {
         Log.d(TAG, "saveRingtone: Saving Ringtone");
 
-        String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root + "/Ringtones/" + mView.getResources().getString(R.string.app_name));
+        String downloadAudioPath = getPath();
+
+        if (fileExists(downloadAudioPath))
+            Toast.makeText(mView, "Ringtone Already Downloaded", Toast.LENGTH_SHORT).show();
+        else new DownloadFile().execute(ringtone.getRingtoneUrl(), downloadAudioPath, type);
+    }
+
+    private String getPath() {
+        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES).getPath();
+        File myDir = new File(root);
         myDir.mkdirs();
-
-        String downloadAudioPath = root + File.separator + getFileName();
-
-        new DownloadFile().execute(getSoundUrl(), downloadAudioPath);
+        return root + File.separator + getFileName();
     }
 
     private String getFileName() {
-        String name = "";
-        switch (mode) {
-            case "recent":
-                name = recentRingtones.get(position).getRingtoneTitle();
-                break;
-            case "popular":
-                name = popularRingtones.get(position).getRingtoneTitle();
-                break;
-        }
+        String url = ringtone.getRingtoneUrl();
+        String name = ringtone.getRingtoneTitle();
+        if (url.endsWith(".mp3"))
+            name += ".mp3";
+        else if (url.endsWith(".wav"))
+            name += ".wav";
+        else if (url.endsWith(".m4u"))
+            name += ".m4u";
+
         return name;
     }
 
-    private String getSoundUrl() {
-        String url = "";
-        switch (mode) {
-            case "recent":
-                url = recentRingtones.get(position).getRingtoneUrl();
-                break;
-            case "popular":
-                url = popularRingtones.get(position).getRingtoneUrl();
-                break;
-        }
-        return url;
+    private File getFile(String uri) {
+        return new File(uri);
+    }
+
+    private boolean fileExists(String uri) {
+        return getFile(uri).exists();
     }
 
     @Override
     public void shareRingtone() {
-        Toast.makeText(mView, "Sharing Ringtone", Toast.LENGTH_SHORT).show();
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("text/plain");
+        i.putExtra(Intent.EXTRA_SUBJECT, mView.getResources().getString(R.string.app_name));
+        String sAux = mView.getResources().getString(R.string.share_msg_1) + " " + ringtone.getRingtoneTitle()
+                + " " + mView.getResources().getString(R.string.share_msg_2)
+                + "\n" + "https://play.google.com/store/apps/details?id=" + mView.getPackageName();
+        i.putExtra(Intent.EXTRA_TEXT, sAux);
+        mView.startActivity(Intent.createChooser(i, "choose one"));
     }
 
     @Override
     public void setAsRingtone() {
-        Toast.makeText(mView, "Setting As Ringtone", Toast.LENGTH_SHORT).show();
+        String path = getPath();
+        File file;
+        if (fileExists(path)) {
+            file = getFile(path);
+            // Create the database record, pointing to the existing file path
+            String mimeType = "";
+            if (path.endsWith(".m4a")) {
+                mimeType = "audio/mp4a-latm";
+            } else if (path.endsWith(".wav")) {
+                mimeType = "audio/wav";
+            } else if (path.endsWith(".mp3")) {
+                mimeType = "audio/mp3";
+            }
+
+            String artist = "" + mView.getResources().getText(R.string.app_name);
+
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DATA, path);
+            values.put(MediaStore.MediaColumns.TITLE, ringtone.getRingtoneTitle());
+            values.put(MediaStore.MediaColumns.SIZE, file.length());
+            values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+
+            values.put(MediaStore.Audio.Media.ARTIST, artist);
+            //values.put(MediaStore.Audio.Media.DURATION, duration);
+
+            values.put(MediaStore.Audio.Media.IS_RINGTONE, true);
+            values.put(MediaStore.Audio.Media.IS_NOTIFICATION, false);
+            values.put(MediaStore.Audio.Media.IS_ALARM, false);
+            values.put(MediaStore.Audio.Media.IS_MUSIC, false);
+
+            // Insert it into the database
+            Uri uri = MediaStore.Audio.Media.getContentUriForPath(path);
+            final Uri newUri = mView.getContentResolver().insert(uri, values);
+            mView.setResult(RESULT_OK, new Intent().setData(newUri));
+
+            RingtoneManager.setActualDefaultRingtoneUri(
+                    mView,
+                    RingtoneManager.TYPE_RINGTONE,
+                    newUri);
+        } else {
+            saveRingtone("ringtone");
+        }
     }
 
     @Override
     public void setAsNotification() {
-        Toast.makeText(mView, "Setting As Notification", Toast.LENGTH_SHORT).show();
+        String path = getPath();
+        File file;
+        if (fileExists(path)) {
+            file = getFile(path);
+            // Create the database record, pointing to the existing file path
+            String mimeType = "";
+            if (path.endsWith(".m4a")) {
+                mimeType = "audio/mp4a-latm";
+            } else if (path.endsWith(".wav")) {
+                mimeType = "audio/wav";
+            } else if (path.endsWith(".mp3")) {
+                mimeType = "audio/mp3";
+            }
+
+            String artist = "" + mView.getResources().getText(R.string.app_name);
+
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DATA, path);
+            values.put(MediaStore.MediaColumns.TITLE, ringtone.getRingtoneTitle());
+            values.put(MediaStore.MediaColumns.SIZE, file.length());
+            values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+
+            values.put(MediaStore.Audio.Media.ARTIST, artist);
+            //values.put(MediaStore.Audio.Media.DURATION, duration);
+
+            values.put(MediaStore.Audio.Media.IS_RINGTONE, false);
+            values.put(MediaStore.Audio.Media.IS_NOTIFICATION, true);
+            values.put(MediaStore.Audio.Media.IS_ALARM, false);
+            values.put(MediaStore.Audio.Media.IS_MUSIC, false);
+
+            // Insert it into the database
+            Uri uri = MediaStore.Audio.Media.getContentUriForPath(path);
+            final Uri newUri = mView.getContentResolver().insert(uri, values);
+            mView.setResult(RESULT_OK, new Intent().setData(newUri));
+
+            RingtoneManager.setActualDefaultRingtoneUri(
+                    mView,
+                    RingtoneManager.TYPE_NOTIFICATION,
+                    newUri);
+        } else {
+            saveRingtone("notification");
+        }
     }
 
     @Override
-    public void setAsContactRingtone() {
-        Toast.makeText(mView, "Setting As Contact Ringtone", Toast.LENGTH_SHORT).show();
+    public void setAsAlarm() {
+        String path = getPath();
+        File file;
+        if (fileExists(path)) {
+            file = getFile(path);
+            // Create the database record, pointing to the existing file path
+            String mimeType = "";
+            if (path.endsWith(".m4a")) {
+                mimeType = "audio/mp4a-latm";
+            } else if (path.endsWith(".wav")) {
+                mimeType = "audio/wav";
+            } else if (path.endsWith(".mp3")) {
+                mimeType = "audio/mp3";
+            }
+
+            String artist = "" + mView.getResources().getText(R.string.app_name);
+
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DATA, path);
+            values.put(MediaStore.MediaColumns.TITLE, ringtone.getRingtoneTitle());
+            values.put(MediaStore.MediaColumns.SIZE, file.length());
+            values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+
+            values.put(MediaStore.Audio.Media.ARTIST, artist);
+            //values.put(MediaStore.Audio.Media.DURATION, duration);
+
+            values.put(MediaStore.Audio.Media.IS_RINGTONE, false);
+            values.put(MediaStore.Audio.Media.IS_NOTIFICATION, false);
+            values.put(MediaStore.Audio.Media.IS_ALARM, true);
+            values.put(MediaStore.Audio.Media.IS_MUSIC, false);
+
+            // Insert it into the database
+            Uri uri = MediaStore.Audio.Media.getContentUriForPath(path);
+            final Uri newUri = mView.getContentResolver().insert(uri, values);
+            mView.setResult(RESULT_OK, new Intent().setData(newUri));
+        } else {
+            saveRingtone("alarm");
+        }
     }
 
     @Override
@@ -471,23 +601,10 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     @Override
-    public void setCurrent(int position) {
-        this.position = position;
-    }
-
-    @Override
-    public void setMode(String mode) {
-        this.mode = mode;
-    }
-
-    @Override
-    public String getMode(){
-        return mode;
-    }
-
-    @Override
-    public int getPosition(){
-        return position;
+    public void setRingtoneObject(String mode, int position) {
+        if (mode.equals("recent"))
+            ringtone = recentRingtones.get(position);
+        else ringtone = popularRingtones.get(position);
     }
 
     private class DownloadFile extends AsyncTask<String, Integer, String> {
@@ -496,13 +613,16 @@ public class MainPresenter implements MainContract.Presenter {
         @Override
         protected String doInBackground(String... url) {
             try {
+                Log.d(TAG, "doInBackground: download url = " + url[0]);
                 URL urls = new URL(url[0]);
                 URLConnection connection = urls.openConnection();
                 connection.connect();
+
                 // this will be useful so that you can show a tipical 0-100% progress bar
                 int lenghtOfFile = connection.getContentLength();
 
                 InputStream input = new BufferedInputStream(urls.openStream());
+                Log.d(TAG, "doInBackground: Where To Put It = " + url[1]);
                 OutputStream output = new FileOutputStream(url[1]);
 
                 byte data[] = new byte[1024];
@@ -519,7 +639,20 @@ public class MainPresenter implements MainContract.Presenter {
                 output.flush();
                 output.close();
                 input.close();
+
+                switch (url[2]) {
+                    case "ringtone":
+                        setAsRingtone();
+                        break;
+                    case "notification":
+                        setAsNotification();
+                        break;
+                    case "alarm":
+                        setAsAlarm();
+                        break;
+                }
             } catch (Exception e) {
+                Log.d(TAG, "doInBackground: Donwload Problem");
             }
             return null;
         }

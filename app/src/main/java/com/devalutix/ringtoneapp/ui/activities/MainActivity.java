@@ -15,11 +15,15 @@ import android.Manifest;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.devalutix.ringtoneapp.R;
 import com.devalutix.ringtoneapp.contracts.MainContract;
@@ -57,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     private RingtonesAdapter recentRingtonesAdapter;
     private BottomSheetBehavior actions_behavior;
     private BottomSheetBehavior retry_behavior;
+    private boolean doubleBackToExitPressedOnce;
 
     /***************************************** View Declarations **********************************/
     //Main
@@ -66,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     TextView user_welcome_text;
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawer;
+    @BindView(R.id.drawer_menu)
+    ImageButton drawerTrigger;
     @BindView(R.id.search)
     SearchView search;
 
@@ -129,12 +136,12 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     void openActionsCard() {
         if (actions_behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED)
             expandActionsCard();
-        else halfExpandActionsCard(mPresenter.getPosition(), mPresenter.getMode());
+        else halfExpandActionsCard(-1, null);
     }
 
     @OnClick(R.id.download_ringtone)
     void downloadRingtone() {
-        mPresenter.saveRingtone();
+        mPresenter.saveRingtone(null);
         collapseActionsCard();
     }
 
@@ -156,9 +163,9 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         collapseActionsCard();
     }
 
-    @OnClick(R.id.set_contact_ringtone)
+    @OnClick(R.id.set_alarm)
     void setContactRingtone() {
-        mPresenter.setAsContactRingtone();
+        mPresenter.setAsAlarm();
         collapseActionsCard();
     }
 
@@ -220,6 +227,19 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, getResources().getString(R.string.click_back_to_exit), Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
     }
 
     /********************************************* Methods ****************************************/
@@ -288,7 +308,6 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     @Override
     public void updateRecyclerView(ArrayList<Ringtone> ringtones, String mode) {
-
         switch (mode) {
             case "recent": {
                 recentRingtonesAdapter.clearAll();
@@ -308,6 +327,18 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         actions_behavior = BottomSheetBehavior.from(actions_card);
         actions_behavior.setHalfExpandedRatio(0.09f);
 
+        actions_behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                dimBackground(slideOffset);
+            }
+        });
+
         collapseActionsCard();
     }
 
@@ -323,10 +354,10 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         searchEditText.setTextColor(getResources().getColor(R.color.colorAccent));
         searchEditText.setHintTextColor(getResources().getColor(R.color.colorAccent));
 
-        search.setOnSearchClickListener(v -> mDrawer.setVisibility(View.INVISIBLE));
+        search.setOnSearchClickListener(v -> drawerTrigger.setVisibility(View.GONE));
 
         search.setOnCloseListener(() -> {
-            mDrawer.setVisibility(VISIBLE);
+            drawerTrigger.setVisibility(VISIBLE);
             return false;
         });
 
@@ -394,13 +425,22 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         Log.d(TAG, "halfExpandActionsCard...");
 
         actions_behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-        mPresenter.setCurrent(position);
-        mPresenter.setMode(mode);
+
+        if (position != -1 && mode != null)
+            mPresenter.setRingtoneObject(mode, position);
     }
 
     @Override
     public void expandActionsCard() {
         actions_behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    @Override
+    public void dimBackground(float factor) {
+        WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+        layoutParams.dimAmount = factor * 0.75f;
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        getWindow().setAttributes(layoutParams);
     }
 
     @Override

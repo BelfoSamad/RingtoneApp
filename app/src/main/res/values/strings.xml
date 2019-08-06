@@ -45,5 +45,8 @@
     <string name="default_ringtone_success_message">Set As Default</string>
     <string name="success_contact_ringtone">Set As Contact Ringtone</string>
     <string name="choose_contact_title">Choose Contact</string>
+    <string name="click_back_to_exit">Please click BACK again to exit</string>
+    <string name="share_msg_1">Hey Check This Ringtone</string>
+    <string name="share_msg_2">On</string>
 
 </resources>

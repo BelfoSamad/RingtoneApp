@@ -393,7 +393,7 @@ public class CreateOnePresenter implements CreateOneContract.Presenter {
 
     private String makeRingtoneFilename(CharSequence title, String extension) {
 
-        String externalRootDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getPath();
+        String externalRootDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES).getPath();
 
         if (!externalRootDir.endsWith("/")) {
             externalRootDir += "/";
@@ -466,7 +466,7 @@ public class CreateOnePresenter implements CreateOneContract.Presenter {
         Random generator = new Random();
         int n = 10000;
         n = generator.nextInt(n);
-        mTitle = mTitle + "_" + n;
+        mTitle = mTitle + "-" + n;
     }
 
     private String getBasename(String filename) {

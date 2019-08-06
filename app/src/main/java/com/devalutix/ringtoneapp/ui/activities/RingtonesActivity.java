@@ -43,7 +43,6 @@ public class RingtonesActivity extends AppCompatActivity implements RingtonesCon
     /**************************************** Declarations ****************************************/
     private MVPComponent mvpComponent;
     private RingtonesAdapter mAdapter;
-    private ArrayList<Ringtone> images;
     @Inject
     RingtonesPresenter mPresenter;
     private BottomSheetBehavior retry_behavior;
@@ -84,36 +83,36 @@ public class RingtonesActivity extends AppCompatActivity implements RingtonesCon
     void openActionsCard() {
         if (actions_behavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED)
             expandActionsCard();
-        else halfExpandActionsCard(mPresenter.getPosition(), mPresenter.getMode());
+        else halfExpandActionsCard(-1, null);
     }
 
     @OnClick(R.id.download_ringtone)
     void downloadRingtone() {
-        //mPresenter.saveRingtone();
+        mPresenter.saveRingtone(null);
         collapseActionsCard();
     }
 
     @OnClick(R.id.share_ringtone)
     void shareRingtone() {
-        //mPresenter.shareRingtone();
+        mPresenter.shareRingtone();
         collapseActionsCard();
     }
 
     @OnClick(R.id.set_ringtone)
     void setRingtone() {
-        //mPresenter.setAsRingtone();
+        mPresenter.setAsRingtone();
         collapseActionsCard();
     }
 
     @OnClick(R.id.set_notification)
     void setNotification() {
-        //mPresenter.setAsNotification();
+        mPresenter.setAsNotification();
         collapseActionsCard();
     }
 
-    @OnClick(R.id.set_contact_ringtone)
+    @OnClick(R.id.set_alarm)
     void setContactRingtone() {
-        //mPresenter.setAsContactRingtone();
+        mPresenter.setAsAlarm();
         collapseActionsCard();
     }
 
@@ -233,7 +232,7 @@ public class RingtonesActivity extends AppCompatActivity implements RingtonesCon
         mAdapter.clearAll();
 
         // Adding The New List of Categories
-        mAdapter.addAll(images);
+        mAdapter.addAll(ringtones);
 
         /*
          * Stop Refreshing the Animations
@@ -291,8 +290,9 @@ public class RingtonesActivity extends AppCompatActivity implements RingtonesCon
         Log.d(TAG, "halfExpandActionsCard...");
 
         actions_behavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
-        mPresenter.setCurrent(position);
-        mPresenter.setMode(mode);
+
+        if (position != -1)
+            mPresenter.setRingtoneObject(position);
     }
 
     @Override

@@ -14,13 +14,21 @@ public interface RingtonesContract {
 
         void updateRecyclerView(String name);
 
+        void saveRingtone(String type);
+
+        void shareRingtone();
+
+        void setAsRingtone();
+
+        void setAsNotification();
+
+        void setAsAlarm();
+
+        void setRingtoneObject(int position);
+
         void setMode(String mode);
 
-        void setCurrent(int position);
-
         String getMode();
-
-        int getPosition();
     }
 
     interface View extends BaseView {
